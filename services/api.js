@@ -1,18 +1,24 @@
-const API_URL = "https://mlmplan-backend.onrender.com";   // Your backend URL
+import axios from "axios";
 
-// LOGIN API
-export async function login(email, password) {
-  try {
-    const response = await fetch(`${API_URL}/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+const api = axios.create({
+  baseURL: "https://mlmplan-backend.onrender.com",  // Backend ka render link
+});
 
-    return await response.json();
-  } catch (error) {
-    return { status: "error", message: "Server not reachable" };
-  }
-}
+// Signup API
+export const signup = (userData) => {
+  return api.post("/api/auth/signup", userData);
+};
+
+// Login API
+export const login = (userData) => {
+  return api.post("/api/auth/login", userData);
+};
+
+// Verify User Token
+export const verifyUser = (token) => {
+  return api.get("/api/auth/verify", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+};
+
+export default api;
