@@ -1,7 +1,4 @@
-import axios from "axios";
-
-const api = axios.create({
-  baseURL: "https://mlmplan-backend.onrender.com",  // Backend ka render link
+: "https://mlmplan-backend.onrender.com",  // Backend ka render link
 });
 
 // Signup API
@@ -19,6 +16,3 @@ export const verifyUser = (token) => {
   return api.get("/api/auth/verify", {
     headers: { Authorization: `Bearer ${token}` }
   });
-};
-
-export default api;
