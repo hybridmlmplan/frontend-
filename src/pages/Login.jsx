@@ -1,46 +1,24 @@
-import { useState } from "react";
-import { loginUser } from "../services/api";
+import axios from "axios";
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [msg, setMsg] = useState("");
+const api = axios.create({
+  baseURL: "https://mlmplan-backend.onrender.com",  // Backend ka render link
+});
 
-  const handleLogin = async () => {
-    const res = await loginUser(email, password);
+// Signup API
+export const signup = (userData) => {
+  return api.post("/api/auth/signup", userData);
+};
 
-    if (res.success) {
-      setMsg("Login Success!");
-      localStorage.setItem("token", res.token);
-      window.location.href = "/dashboard";
-    } else {
-      setMsg(res.message || "Invalid credentials");
-    }
-  };
+// Login API
+export const login = (userData) => {
+  return api.post("/api/auth/login", userData);
+};
 
-  return (
-    <div className="login-box">
-      <h2>Login</h2>
+// Verify User Token
+export const verifyUser = (token) => {
+  return api.get("/api/auth/verify", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+};
 
-      <input
-        type="text"
-        placeholder="Enter Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-
-      <input
-        type="password"
-        placeholder="Enter Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-
-      <button onClick={handleLogin}>Login</button>
-
-      <p>{msg}</p>
-    </div>
-  );
-}
-
-export default Login;
+export default api;
