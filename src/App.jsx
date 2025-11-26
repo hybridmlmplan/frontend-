@@ -1,11 +1,15 @@
-import React from "react";
-import Dashboard from "./Dashboard";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "../services/pages/Login.jsx";
+import Dashboard from "./Dashboard.jsx";
 
 function App() {
   return (
-    <>
-      <Dashboard />
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
