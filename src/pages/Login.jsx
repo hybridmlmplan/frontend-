@@ -5,7 +5,7 @@ import axios from "axios";
 export default function Login() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");  // email → username
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -17,7 +17,7 @@ export default function Login() {
 
     try {
       const res = await axios.post("https://backend-1lby.onrender.com/login", {
-        email,
+        username,   // backend ke hisaab se correct
         password,
       });
 
@@ -54,10 +54,10 @@ export default function Login() {
         )}
 
         <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          placeholder="Username"   // email -> username
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
           style={{
             width: "100%",
