@@ -1,92 +1,46 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-  CircularProgress,
-} from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import axios from "../api/axios";
+import { useState } from "react";
+import { loginUser } from "../services/api";
 
 function Login() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
 
   const handleLogin = async () => {
-    if (!email || !password) return alert("Please enter all fields");
+    const res = await loginUser(email, password);
 
-    setLoading(true);
-
-    try {
-      const res = await axios.post("/auth/login", { email, password });
-
-      localStorage.setItem("token", res.data.token);
-      navigate("/dashboard");
-    } catch (error) {
-      alert("Invalid login credentials");
+    if (res.success) {
+      setMsg("Login Success!");
+      localStorage.setItem("token", res.token);
+      window.location.href = "/dashboard";
+    } else {
+      setMsg(res.message || "Invalid credentials");
     }
-
-    setLoading(false);
   };
 
   return (
-    <Box
-      sx={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#f5f6fa",
-      }}
-    >
-      <Paper
-        elevation={4}
-        sx={{
-          width: 360,
-          padding: 4,
-          textAlign: "center",
-          borderRadius: 3,
-        }}
-      >
-        <Typography variant="h5" fontWeight="bold" mb={2}>
-          Login
-        </Typography>
+    <div className="login-box">
+      <h2>Login</h2>
 
-        <TextField
-          label="Email"
-          fullWidth
-          sx={{ mb: 2 }}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <input
+        type="text"
+        placeholder="Enter Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-        <TextField
-          label="Password"
-          fullWidth
-          type="password"
-          sx={{ mb: 3 }}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+      <input
+        type="password"
+        placeholder="Enter Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-        <Button
-          variant="contained"
-          fullWidth
-          onClick={handleLogin}
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} /> : "Login"}
-        </Button>
+      <button onClick={handleLogin}>Login</button>
 
-        <Typography
-          mt={2}
-          sx={{ cursor: "pointer", color: "blue" }}
-          onClick={() => navigate("/register")}
-        >
-          Create New Account
-        </Typography>
-      </Paper>
+      <p>{msg}</p>
+    </div>
+  );
+}
+
+export default Login;
