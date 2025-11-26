@@ -5,7 +5,7 @@ import axios from "axios";
 export default function Login() {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");  // email → username
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,8 +16,8 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await axios.post("https://backend-1lby.onrender.com/login", {
-        username,   // backend ke hisaab se correct
+      const res = await axios.post("https://mlmplan-backend.onrender.com/login", {
+        email,
         password,
       });
 
@@ -34,71 +34,85 @@ export default function Login() {
   };
 
   return (
-    <div style={{ width: "100%", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", background: "#f7f7f7" }}>
-      <form
-        onSubmit={handleLogin}
-        style={{
-          width: "320px",
-          padding: "25px",
-          background: "white",
-          borderRadius: "10px",
-          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-        }}
-      >
-        <h2 style={{ marginBottom: "20px", textAlign: "center" }}>Login</h2>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h2 style={styles.title}>MLM Login</h2>
 
-        {error && (
-          <p style={{ color: "red", textAlign: "center", marginBottom: "10px" }}>
-            {error}
-          </p>
-        )}
+        {error && <p style={styles.error}>{error}</p>}
 
-        <input
-          type="text"
-          placeholder="Username"   // email -> username
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "10px",
-            borderRadius: "5px",
-            border: "1px solid #ccc",
-          }}
-        />
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="Email"
+            style={styles.input}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "10px",
-            borderRadius: "5px",
-            border: "1px solid #ccc",
-          }}
-        />
+          <input
+            type="password"
+            placeholder="Password"
+            style={styles.input}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: "10px",
-            background: "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+          <button style={styles.button} disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    width: "100%",
+    height: "100vh",
+    background: "#e9ecef",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  card: {
+    width: "320px",
+    padding: "25px",
+    background: "white",
+    borderRadius: "12px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+  },
+  title: {
+    textAlign: "center",
+    marginBottom: "20px",
+    fontSize: "22px",
+    fontWeight: "600",
+    color: "#333",
+  },
+  error: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: "10px",
+    fontSize: "14px",
+  },
+  input: {
+    width: "100%",
+    padding: "12px",
+    marginBottom: "12px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
+    fontSize: "14px",
+  },
+  button: {
+    width: "100%",
+    padding: "12px",
+    background: "#007bff",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+};
