@@ -16,10 +16,13 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await axios.post("https://mlmplan-backend.onrender.com/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "https://mlmplan-backend.onrender.com/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
 
       if (res.data.success) {
         navigate("/dashboard");
