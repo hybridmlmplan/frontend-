@@ -24,7 +24,8 @@ export default function Login() {
         }
       );
 
-      if (res.data.success) {
+      // SUCCESS CHECK (Yahi correct hai)
+      if (res.data.token) {
         navigate("/dashboard");
       } else {
         setError(res.data.message || "Invalid login");
