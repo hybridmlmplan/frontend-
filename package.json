@@ -1,4 +1,4 @@
-{
+
   "name": "hybrid-mlm-frontend",
   "version": "1.0.0",
   "private": true,
@@ -15,5 +15,3 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",
     "vite": "^5.0.0"
-  }
-}
