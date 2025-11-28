@@ -20,7 +20,6 @@ function Register() {
 
     const response = await register(form);
 
-    // Backend response: { message: "Signup Success", user: {...} }
     if (response.message === "Signup Success") {
       setMessage("Registration Successful!");
     } else {
