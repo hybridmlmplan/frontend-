@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  preview: {
-    allowedHosts: ["mlmplan-frontend-43ru.onrender.com"],
-  }
+  plugins: [react()],
 });
