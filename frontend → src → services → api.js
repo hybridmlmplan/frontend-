@@ -1,14 +1,17 @@
-// REGISTER API
-export async function register(data) {
-  try {
-    const response = await fetch(`${API_URL}/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+import axios from "axios";
 
-    return await response.json();
-  } catch (error) {
-    return { status: "error", message: "Server not reachable" };
-  }
-}
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL
+});
+
+// signup
+export const signup = (data) => API.post("/api/auth/signup", data);
+
+// login
+export const login = (data) => API.post("/api/auth/login", data);
+
+// verify token
+export const verifyUser = (token) =>
+  API.get("/api/auth/verify", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
