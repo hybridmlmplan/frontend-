@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { register } from "../services/api";
+import { register } from "../api";   // api.js se import
 
 function Register() {
   const [form, setForm] = useState({
@@ -20,10 +20,11 @@ function Register() {
 
     const response = await register(form);
 
-    if (response.status === "success") {
+    // Backend response: { message: "Signup Success", user: {...} }
+    if (response.message === "Signup Success") {
       setMessage("Registration Successful!");
     } else {
-      setMessage(response.message);
+      setMessage(response.message || "Something went wrong");
     }
   };
 
@@ -36,6 +37,7 @@ function Register() {
           type="text"
           name="name"
           placeholder="Full Name"
+          value={form.name}
           onChange={handleChange}
           required
         />
@@ -44,6 +46,7 @@ function Register() {
           type="email"
           name="email"
           placeholder="Email"
+          value={form.email}
           onChange={handleChange}
           required
         />
@@ -52,6 +55,7 @@ function Register() {
           type="text"
           name="mobile"
           placeholder="Mobile Number"
+          value={form.mobile}
           onChange={handleChange}
           required
         />
@@ -60,6 +64,7 @@ function Register() {
           type="password"
           name="password"
           placeholder="Password"
+          value={form.password}
           onChange={handleChange}
           required
         />
