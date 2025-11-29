@@ -9,7 +9,7 @@ export default function Signup() {
   const signup = async () => {
     try {
       const res = await axios.post(
-        "https://mlmplan-backend.onrender.com/api/auth/signup",
+        "https://backend-1-1b8h.onrender.com/api/auth/signup",
         { name, email, password }
       );
       alert(res.data.message);
