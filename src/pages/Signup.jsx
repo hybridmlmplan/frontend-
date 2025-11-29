@@ -1,49 +1,90 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
+  const navigate = useNavigate();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const signup = async () => {
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
-      const res = await axios.post(
+      await axios.post(
         "https://backend-1-1b8h.onrender.com/api/auth/signup",
         { name, email, password }
       );
 
-      alert(res.data.message);
+      alert("Signup Successful!");
+      navigate("/login");
     } catch (err) {
-      alert("Signup failed");
-      console.error(err);
+      alert(err.response?.data?.message || "Signup failed");
     }
+
+    setLoading(false);
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Signup</h2>
+    <div style={{ width: "90%", margin: "40px auto", maxWidth: "400px" }}>
+      <h2 style={{ textAlign: "center" }}>Signup</h2>
 
-      <input
-        placeholder="Name"
-        onChange={(e) => setName(e.target.value)}
-        style={{ display: "block", marginBottom: 10 }}
-      />
+      <form onSubmit={handleSignup}>
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+        />
 
-      <input
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ display: "block", marginBottom: 10 }}
-      />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+        />
 
-      <input
-        placeholder="Password"
-        type="password"
-        onChange={(e) => setPassword(e.target.value)}
-        style={{ display: "block", marginBottom: 10 }}
-      />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+        />
 
-      <button onClick={signup}>Signup</button>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "10px",
+            background: "green",
+            color: "white",
+            border: "none",
+          }}
+        >
+          {loading ? "Please wait..." : "Signup"}
+        </button>
+
+        <p style={{ textAlign: "center", marginTop: "10px" }}>
+          Already have an account?{" "}
+          <span
+            onClick={() => navigate("/login")}
+            style={{ color: "blue", cursor: "pointer" }}
+          >
+            Login
+          </span>
+        </p>
+      </form>
     </div>
   );
 }
