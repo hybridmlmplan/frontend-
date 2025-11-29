@@ -7,13 +7,17 @@ export default function Signup() {
   const [password, setPassword] = useState("");
 
   const signup = async () => {
-    const res = await axios.post("https://your-backend-url/api/auth/signup", {
-      name,
-      email,
-      password,
-    });
+    try {
+      const res = await axios.post(
+        "https://backend-1-1b8h.onrender.com/api/auth/signup",
+        { name, email, password }
+      );
 
-    alert(res.data.message);
+      alert(res.data.message);
+    } catch (err) {
+      alert("Signup failed");
+      console.error(err);
+    }
   };
 
   return (
