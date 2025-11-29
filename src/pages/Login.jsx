@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 export default function Login() {
@@ -8,7 +9,7 @@ export default function Login() {
   const login = async () => {
     try {
       const res = await axios.post(
-        "https://mlmplan-backend.onrender.com/api/auth/login",
+        "https://backend-1-1b8h.onrender.com/api/auth/login",
         { email, password }
       );
       alert(res.data.message);
@@ -35,7 +36,16 @@ export default function Login() {
         style={{ display: "block", marginBottom: 10 }}
       />
 
-      <button onClick={login}>Login</button>
+      <button onClick={login} style={{ marginBottom: 20 }}>
+        Login
+      </button>
+
+      <br />
+
+      {/* NEW SIGNUP BUTTON */}
+      <Link to="/signup">
+        <button>Create Account (Signup)</button>
+      </Link>
     </div>
   );
 }
