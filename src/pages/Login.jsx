@@ -1,51 +1,87 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import axios from "../../utils/axiosInstance"; 
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const login = async () => {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setLoading(true);
+
     try {
-      const res = await axios.post(
-        "https://backend-1-1b8h.onrender.com/api/auth/login",
-        { email, password }
-      );
-      alert(res.data.message);
+      const res = await axios.post("/auth/login", {
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        navigate("/dashboard");
+      }
     } catch (err) {
-      alert("Login failed");
-      console.log(err);
+      setErrorMsg(
+        err.response?.data?.message || "Invalid login details"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-6">
 
-      <input
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ display: "block", marginBottom: 10 }}
-      />
+        <h2 className="text-2xl font-semibold text-center mb-5 text-gray-700">
+          Login
+        </h2>
 
-      <input
-        placeholder="Password"
-        type="password"
-        onChange={(e) => setPassword(e.target.value)}
-        style={{ display: "block", marginBottom: 10 }}
-      />
+        {errorMsg && (
+          <div className="bg-red-100 text-red-600 p-2 rounded mb-3 text-center text-sm">
+            {errorMsg}
+          </div>
+        )}
 
-      <button onClick={login} style={{ marginBottom: 20 }}>
-        Login
-      </button>
+        <form onSubmit={handleLogin}>
 
-      <br />
+          <label className="text-sm text-gray-600">Email</label>
+          <input
+            type="email"
+            className="w-full p-3 border rounded-lg mb-3 focus:outline-none"
+            placeholder="Enter email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-      {/* NEW SIGNUP BUTTON */}
-      <Link to="/signup">
-        <button>Create Account (Signup)</button>
-      </Link>
+          <label className="text-sm text-gray-600">Password</label>
+          <input
+            type="password"
+            className="w-full p-3 border rounded-lg mb-4 focus:outline-none"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg mt-2"
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+
+      </div>
     </div>
   );
 }
