@@ -6,19 +6,20 @@ import PrivateRoute from "./routes/PrivateRoute";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 
-// Dashboard
-import Dashboard from "./pages/dashboard/Dashboard";
+// Dashboard (replace Dashboard with Home)
+import Home from "./pages/dashboard/Home";
 
 // User Pages
-import Profile from "./pages/user/Profile";
-import GenealogyTree from "./pages/genealogy/GenealogyTree";
+import Profile from "./pages/dashboard/Profile";
+import GenealogyTree from "./pages/myteam"; // If you have genealogy page separately, update path
 
 // Purchase
 import PackagePurchase from "./pages/purchase/PackagePurchase";
+import BuyPackage from "./pages/buypackage";
 
 // Income Pages
 import DirectIncome from "./pages/income/DirectIncome";
-import PairIncome from "./pages/income/PairIncome";
+import PairIncome from "./pages/income/BinaryIncome"; // rename if needed
 import LevelIncome from "./pages/income/LevelIncome";
 import RoyaltyIncome from "./pages/income/RoyaltyIncome";
 import FundIncome from "./pages/income/FundIncome";
@@ -40,12 +41,12 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Dashboard (Protected) */}
+          {/* Dashboard */}
           <Route
             path="/dashboard"
             element={
               <PrivateRoute>
-                <Dashboard />
+                <Home />
               </PrivateRoute>
             }
           />
@@ -60,12 +61,22 @@ export default function App() {
             }
           />
 
-          {/* Genealogy */}
+          {/* Genealogy / My Team */}
           <Route
-            path="/genealogy"
+            path="/myteam"
             element={
               <PrivateRoute>
                 <GenealogyTree />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Buy Package */}
+          <Route
+            path="/buy"
+            element={
+              <PrivateRoute>
+                <BuyPackage />
               </PrivateRoute>
             }
           />
@@ -80,7 +91,7 @@ export default function App() {
             }
           />
 
-          {/* Income Pages */}
+          {/* Income */}
           <Route
             path="/income/direct"
             element={
@@ -89,7 +100,6 @@ export default function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/income/pair"
             element={
@@ -98,7 +108,6 @@ export default function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/income/level"
             element={
@@ -107,7 +116,6 @@ export default function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/income/royalty"
             element={
@@ -116,7 +124,6 @@ export default function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/income/fund"
             element={
@@ -135,7 +142,6 @@ export default function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/epin/transfer"
             element={
