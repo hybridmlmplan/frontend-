@@ -31,9 +31,10 @@ export default function Register() {
     try {
       const res = await API.post("/auth/signup", form);
 
-      if (res.data.success) {
-        navigate("/login");
+      if (res.data.token || res.data.success) {
+  navigate("/login");
       }
+      
     } catch (err) {
       setError(
         err.response?.data?.message || "Registration failed, please try again."
