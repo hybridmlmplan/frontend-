@@ -39,7 +39,7 @@ export default function App() {
 
           {/* Auth */}
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/signup" element={<Register />} />
 
           {/* Dashboard */}
           <Route
