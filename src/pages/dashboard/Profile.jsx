@@ -1,23 +1,36 @@
 useEffect(() => {
+  let mounted = true;
+
   setLoading(true);
 
   API.get("/user/me")
     .then((res) => {
-      if (!res.data?.user) {
+      if (!mounted) return;
+
+      const user = res.data?.user;
+
+      if (!user) {
         setUser(null);
-      } else {
-        setUser(res.data.user);
-        setForm({
-          name: res.data.user.name || "",
-          email: res.data.user.email || "",
-          mobile: res.data.user.phone || res.data.user.mobile || "",
-        });
+        return;
       }
+
+      setUser(user);
+
+      setForm({
+        name: user.name || "",
+        email: user.email || "",
+        mobile: user.phone || "",
+      });
     })
     .catch((err) => {
-      console.log("Profile load error", err);
+      console.error("Profile load error:", err.response?.data || err.message);
+      if (mounted) setUser(null);
     })
     .finally(() => {
-      setLoading(false);
+      if (mounted) setLoading(false);
     });
+
+  return () => {
+    mounted = false;
+  };
 }, []);
