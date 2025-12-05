@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "../../utils/axiosInstance"; 
+import axios from "../../utils/axiosInstance";
 
 export default function Login() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -17,8 +17,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await axios.post("/auth/login", {
-        email: email.trim(),
+      const res = await axios.post("/api/auth/login", {
+        phone: phone.trim(),
         password: password.trim(),
       });
 
@@ -26,7 +26,10 @@ export default function Login() {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
         navigate("/dashboard");
+      } else {
+        setErrorMsg("Unexpected server response");
       }
+
     } catch (err) {
       setErrorMsg(
         err.response?.data?.message || "Invalid login details"
@@ -52,13 +55,14 @@ export default function Login() {
 
         <form onSubmit={handleLogin}>
 
-          <label className="text-sm text-gray-600">Email</label>
+          <label className="text-sm text-gray-600">Mobile Number</label>
           <input
-            type="email"
+            type="text"
             className="w-full p-3 border rounded-lg mb-3 focus:outline-none"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter mobile number"
+            value={phone}
+            maxLength={10}
+            onChange={(e) => setPhone(e.target.value)}
             required
           />
 
@@ -83,7 +87,7 @@ export default function Login() {
 
         {/* Signup link */}
         <div className="mt-4 text-center text-sm text-gray-600">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link to="/signup" className="text-blue-600 font-semibold">
             Sign Up
           </Link>
