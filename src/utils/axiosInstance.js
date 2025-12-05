@@ -1,22 +1,22 @@
 import axios from "axios";
 
 // ----------------------------------------
-// BASE URL (Render backend)
+// AXIOS INSTANCE
 // ----------------------------------------
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // example: https://backend-1.onrender.com/api
-  withCredentials: false,
+  baseURL: `${import.meta.env.VITE_API_URL}/api`, // IMPORTANT FIX
+  timeout: 20000, // 20 sec timeout
 });
 
 // ----------------------------------------
-// ATTACH TOKEN AUTOMATICALLY
+// REQUEST INTERCEPTOR → ADD TOKEN
 // ----------------------------------------
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
 
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
@@ -25,23 +25,22 @@ API.interceptors.request.use(
 );
 
 // ----------------------------------------
-// RESPONSE INTERCEPTOR → AUTO LOGOUT ON 401
+// RESPONSE INTERCEPTOR → AUTO LOGOUT
 // ----------------------------------------
 API.interceptors.response.use(
   (response) => response,
 
   (error) => {
-    // If token expired or invalid
     if (
       error.response &&
-      error.response.status === 401 &&
-      !error.config.__isRetryRequest
+      error.response.status === 401
     ) {
+      // clear storage
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 
-      // Redirect to login page
-      window.location.href = "/login";
+      // redirect without infinite loop
+      window.location.assign("/login");
     }
 
     return Promise.reject(error);
