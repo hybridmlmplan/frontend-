@@ -7,9 +7,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    API.get("/user/me")
+    API.get("/auth/me") // changed → match backend
       .then((res) => {
-        setUser(res.data.user || null);
+        setUser(res.data.data || null);
         setLoading(false);
       })
       .catch((err) => {
@@ -34,12 +34,13 @@ export default function Home() {
 
   return (
     <div className="p-4 space-y-4">
-      {/* ------------------------ Heading ------------------------ */}
+
+      {/* Heading */}
       <h1 className="text-3xl font-bold text-gray-800 tracking-wide">
         Dashboard Overview
       </h1>
 
-      {/* ------------------------ User Card ------------------------ */}
+      {/* User Card */}
       <div className="bg-white shadow-md rounded-lg p-4 border">
         <h2 className="text-lg font-semibold mb-2 text-gray-800">
           Welcome, {user.name}
@@ -53,12 +54,12 @@ export default function Home() {
             <strong>Email:</strong> {user.email}
           </p>
           <p>
-            <strong>Mobile:</strong> {user.mobile}
+            <strong>Phone:</strong> {user.phone}
           </p>
         </div>
       </div>
 
-      {/* ------------------------ Package Card ------------------------ */}
+      {/* Package Card */}
       <div className="bg-blue-50 shadow-md rounded-lg p-4 border border-blue-200">
         <h2 className="text-lg font-semibold mb-2 text-blue-700">
           Package Details
@@ -66,8 +67,7 @@ export default function Home() {
 
         <div className="space-y-1 text-gray-700">
           <p>
-            <strong>Package:</strong>{" "}
-            {user.packageName ? user.packageName : "Not Purchased"}
+            <strong>Package:</strong> {user.packageName || "Not Purchased"}
           </p>
           <p>
             <strong>PV:</strong> {user.pv || 0}
@@ -78,7 +78,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ------------------------ Wallet Card ------------------------ */}
+      {/* Wallet Card */}
       <div className="bg-green-50 shadow-md rounded-lg p-4 border border-green-200">
         <h2 className="text-lg font-semibold mb-2 text-green-700">
           Wallet Summary
