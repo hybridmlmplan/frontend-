@@ -1,4 +1,6 @@
 useEffect(() => {
+  setLoading(true);
+
   API.get("/user/me")
     .then((res) => {
       if (!res.data?.user) {
@@ -8,13 +10,14 @@ useEffect(() => {
         setForm({
           name: res.data.user.name || "",
           email: res.data.user.email || "",
-          mobile: res.data.user.mobile || "",
+          mobile: res.data.user.phone || res.data.user.mobile || "",
         });
       }
-      setLoading(false);
     })
     .catch((err) => {
       console.log("Profile load error", err);
+    })
+    .finally(() => {
       setLoading(false);
     });
 }, []);
