@@ -10,9 +10,11 @@ export default function Signup() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    mobile: "",
+    phone: "",
     password: "",
     sponsorId: "",
+    placementId: "",
+    placementSide: "left",
     packageName: ""
   });
 
@@ -25,15 +27,28 @@ export default function Signup() {
     setLoading(true);
 
     try {
+      // Final payload
+      const payload = {
+        ...form,
+        placementId: form.placementId || form.sponsorId,
+        placementSide: form.placementSide || "left",
+        packageName: form.packageName.toLowerCase()
+      };
+
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/signup`,
-        form
+        payload
       );
 
       alert(res.data.message || "Signup successful!");
       navigate("/login");
+
     } catch (error) {
-      alert(error?.response?.data?.message || "Signup failed!");
+      alert(
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Signup failed!"
+      );
     }
 
     setLoading(false);
@@ -63,15 +78,14 @@ export default function Signup() {
             className="w-full border p-2 rounded"
             value={form.email}
             onChange={handleChange}
-            required
           />
 
           <input
             type="text"
-            name="mobile"
+            name="phone"
             placeholder="Mobile Number"
             className="w-full border p-2 rounded"
-            value={form.mobile}
+            value={form.phone}
             onChange={handleChange}
             maxLength={10}
             required
@@ -97,7 +111,17 @@ export default function Signup() {
             required
           />
 
-          {/* PACKAGE DROPDOWN */}
+          {/* placementId optional */}
+          <input
+            type="text"
+            name="placementId"
+            placeholder="Placement ID (Optional)"
+            className="w-full border p-2 rounded"
+            value={form.placementId}
+            onChange={handleChange}
+          />
+
+          {/* PACKAGE */}
           <select
             name="packageName"
             className="w-full border p-2 rounded"
@@ -109,6 +133,17 @@ export default function Signup() {
             <option value="Silver">Silver (₹35)</option>
             <option value="Gold">Gold (₹155)</option>
             <option value="Ruby">Ruby (₹1250)</option>
+          </select>
+
+          {/* PLACEMENT SIDE */}
+          <select
+            name="placementSide"
+            className="w-full border p-2 rounded"
+            value={form.placementSide}
+            onChange={handleChange}
+          >
+            <option value="left">Left</option>
+            <option value="right">Right</option>
           </select>
 
           <button
