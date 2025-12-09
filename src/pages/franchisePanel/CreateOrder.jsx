@@ -1,0 +1,3 @@
+import React, { useState } from "react";
+import api from "../../api";
+export default function CreateOrder(){ const [price,setPrice]=useState(0); const submit=async(e)=>{ e.preventDefault(); try{ await api.post("/franchise/purchase",{ price: Number(price) }); alert("Order created"); }catch(e){ alert(e.response?.data?.message || e.message); } }; return (<div className="max-w-md bg-white p-4 rounded"><h2 className="font-bold mb-2">Create Order</h2><form onSubmit={submit}><input value={price} onChange={e=>setPrice(e.target.value)} placeholder="Price" className="w-full border p-2 mb-2"/><button className="bg-blue-600 text-white px-3 py-1 rounded">Create</button></form></div>); }
