@@ -1,13 +1,403 @@
-
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Hybrid MLM</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hybrid MLM - Dashboard</title>
+
+  <!-- Tailwind CDN - for quick styling. Replace with your production build if needed -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/heroicons/2.0.13/mini/index.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    /* Small custom styles for the page */
+    body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    .card { background: white; border-radius: .5rem; box-shadow: 0 6px 24px rgba(15,23,42,0.06); padding: 1rem; }
+    .pair-red { background: #fee2e2; color: #7f1d1d; padding: .25rem .5rem; border-radius: .375rem; }
+    .pair-green { background: #dcfce7; color: #166534; padding: .25rem .5rem; border-radius: .375rem; }
+    /* genealogy placeholder */
+    .tree-node { border: 1px solid #e6e6e6; padding: .5rem .75rem; border-radius: .375rem; background: #fff; display:inline-block; }
+    /* small responsive tweaks */
+    @media (min-width: 1024px) {
+      #main-grid { grid-template-columns: 320px 1fr 360px; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+  <!-- Toasts (verify_frontend.js expects #toast-container or will create) -->
+  <div id="toast-container" aria-live="polite" class="z-50"></div>
+
+  <!-- Header -->
+  <header class="bg-white border-b">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 text-white rounded-md flex items-center justify-center font-bold">HM</div>
+        <div>
+          <h1 class="text-lg font-semibold">Hybrid MLM</h1>
+          <div class="text-xs text-slate-500">PV & BV based binary + rank system</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="btn-packages" class="px-3 py-2 border rounded text-sm">Packages</button>
+        <button id="btn-signup" class="px-3 py-2 bg-green-600 text-white rounded text-sm">Signup</button>
+        <button id="btn-login" class="px-3 py-2 border rounded text-sm">Login</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="container mx-auto px-4 py-6">
+    <div id="main-grid" class="grid gap-6 lg:gap-8">
+
+      <!-- Left: User Panel / Auth -->
+      <aside class="card">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-sm font-medium">Quick Actions</h2>
+            <p class="text-xs text-slate-500">Signup/Login to access full features</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <button id="openSignup" class="w-full bg-blue-600 text-white py-2 rounded">Create Account</button>
+          <button id="openLogin" class="w-full border py-2 rounded">Sign In</button>
+          <button id="openEPIN" class="w-full border py-2 rounded">Activate EPIN</button>
+        </div>
+
+        <hr class="my-4" />
+
+        <div>
+          <h3 class="text-sm font-medium mb-2">Packages</h3>
+          <div id="package-list" class="space-y-2 text-sm text-slate-700">
+            <!-- packages loaded by JS -->
+            <div class="text-xs text-slate-400">Loading packages…</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center: Dashboard -->
+      <section class="card">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-bold" id="user-greeting">Welcome, Guest</h2>
+            <div id="user-sub" class="text-sm text-slate-500">Login or Signup to manage your account</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-slate-500">Server Time</div>
+            <div id="server-time" class="text-sm font-medium">--:--</div>
+          </div>
+        </div>
+
+        <!-- Dashboard top cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="p-3 bg-white rounded shadow-sm">
+            <div class="text-xs text-slate-500">Wallet Balance</div>
+            <div id="wallet-balance" class="text-xl font-semibold">₹0.00</div>
+            <div class="text-xs text-slate-400">Royalty / Binary / BV</div>
+          </div>
+
+          <div class="p-3 bg-white rounded shadow-sm">
+            <div class="text-xs text-slate-500">PV (Binary)</div>
+            <div id="user-pv" class="text-xl font-semibold">0 PV</div>
+            <div class="text-xs text-slate-400">Pending / Cleared pairs</div>
+          </div>
+
+          <div class="p-3 bg-white rounded shadow-sm">
+            <div class="text-xs text-slate-500">Rank</div>
+            <div id="user-rank" class="text-xl font-semibold">-</div>
+            <div class="text-xs text-slate-400">Next rank progress shown in Rank panel</div>
+          </div>
+        </div>
+
+        <!-- Pair session / red-green view -->
+        <div>
+          <h3 class="text-lg font-medium mb-3">Binary Sessions (Today)</h3>
+          <div id="session-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <!-- Filled by JS: each session showing package pair counts and red/green indicators -->
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <h3 class="text-lg font-medium mb-3">Recent Activities</h3>
+          <div id="activity-list" class="text-sm space-y-2 text-slate-700">
+            <div class="text-xs text-slate-400">No activities yet — sign up / activate EPIN to start</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Genealogy + Wallet + Notifications -->
+      <aside class="card">
+        <div>
+          <h3 class="text-md font-semibold mb-2">Genealogy</h3>
+          <div class="text-xs text-slate-500 mb-2">View your downline (first 2 levels)</div>
+
+          <div id="genealogy" class="p-3 bg-slate-50 rounded">
+            <!-- Simple placeholder tree -->
+            <div class="tree-node mb-2">You (you123)</div>
+            <div class="ml-6">
+              <div class="flex gap-2 items-center mb-2">
+                <div class="tree-node">A (a123)</div>
+                <div class="tree-node">B (b123)</div>
+              </div>
+              <div class="ml-6">
+                <div class="flex gap-2">
+                  <div class="tree-node">A1</div>
+                  <div class="tree-node">A2</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div>
+          <h3 class="text-md font-semibold mb-2">Wallet Actions</h3>
+          <div class="space-y-2">
+            <button id="withdraw-btn" class="w-full bg-yellow-500 text-white rounded py-2">Request Withdraw</button>
+            <button id="wallet-history-btn" class="w-full border rounded py-2">Wallet History</button>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div>
+          <h3 class="text-md font-semibold mb-2">Notifications</h3>
+          <div id="notifications" class="text-sm text-slate-600 space-y-2">
+            <div class="text-xs text-slate-400">No new notifications</div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="text-center py-6 text-xs text-slate-500">
+    © <span id="year"></span> Hybrid MLM • Built for PV/BV binary + rank engine
+  </footer>
+
+  <!-- Signup Modal -->
+  <div id="modal-signup" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-md w-full max-w-xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">Create Account</h3>
+        <button id="close-signup" class="text-slate-500">✕</button>
+      </div>
+
+      <form data-vf="signup" id="form-signup" class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input name="name" placeholder="Full Name" required class="w-full p-2 border rounded" />
+          <input name="mobile" placeholder="Mobile number" required class="w-full p-2 border rounded" />
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input name="email" placeholder="Email" required class="w-full p-2 border rounded" />
+          <input name="password" placeholder="Password" type="password" required class="w-full p-2 border rounded" />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input name="sponsorId" placeholder="Sponsor ID (required)" required class="w-full p-2 border rounded" />
+          <input name="placementId" placeholder="Placement ID (optional)" class="w-full p-2 border rounded" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600">Choose Package</label>
+          <select name="package" class="w-full p-2 border rounded mt-1">
+            <option value="">Select package</option>
+            <option value="silver">Silver - ₹35</option>
+            <option value="gold">Gold - ₹155</option>
+            <option value="ruby">Ruby - ₹1250</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Create</button>
+          <button type="button" id="btn-cancel-signup" class="px-4 py-2 border rounded">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="modal-login" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-md w-full max-w-md p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">Login</h3>
+        <button id="close-login" class="text-slate-500">✕</button>
+      </div>
+
+      <form data-vf="login" id="form-login" class="space-y-3">
+        <input name="login" placeholder="User ID or Email" class="w-full p-2 border rounded" />
+        <input name="password" type="password" placeholder="Password" class="w-full p-2 border rounded" />
+        <div class="flex items-center gap-3">
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Sign in</button>
+          <button type="button" id="btn-cancel-login" class="px-4 py-2 border rounded">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EPIN Modal -->
+  <div id="modal-epin" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-md w-full max-w-md p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">Activate EPIN</h3>
+        <button id="close-epin" class="text-slate-500">✕</button>
+      </div>
+
+      <form data-vf="epin" id="form-epin" class="space-y-3">
+        <input name="epin" placeholder="Enter EPIN code" class="w-full p-2 border rounded" />
+        <div class="flex items-center gap-3">
+          <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Activate</button>
+          <button type="button" id="btn-cancel-epin" class="px-4 py-2 border rounded">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Script dependencies -->
+  <!-- verify_frontend.js should exist at /scripts/verify_frontend.js (you have it from earlier request) -->
+  <script src="/scripts/verify_frontend.js"></script>
+
+  <script>
+    // init verify frontend script with api base
+    VerifyFrontend.init({ apiBase: '/api', minPasswordLen: 6, enableSocket: true });
+
+    // Basic page JS to wire up modals, load packages, show server time
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      // modal wiring
+      const modalSignup = document.getElementById('modal-signup');
+      const modalLogin = document.getElementById('modal-login');
+      const modalEPIN = document.getElementById('modal-epin');
+
+      document.getElementById('openSignup').addEventListener('click', () => modalSignup.classList.remove('hidden'));
+      document.getElementById('btn-signup').addEventListener('click', () => modalSignup.classList.remove('hidden'));
+      document.getElementById('close-signup').addEventListener('click', () => modalSignup.classList.add('hidden'));
+      document.getElementById('btn-cancel-signup').addEventListener('click', () => modalSignup.classList.add('hidden'));
+
+      document.getElementById('openLogin').addEventListener('click', () => modalLogin.classList.remove('hidden'));
+      document.getElementById('btn-login').addEventListener('click', () => modalLogin.classList.remove('hidden'));
+      document.getElementById('close-login').addEventListener('click', () => modalLogin.classList.add('hidden'));
+      document.getElementById('btn-cancel-login').addEventListener('click', () => modalLogin.classList.add('hidden'));
+
+      document.getElementById('openEPIN').addEventListener('click', () => modalEPIN.classList.remove('hidden'));
+      document.getElementById('btn-packages').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      document.getElementById('close-epin').addEventListener('click', () => modalEPIN.classList.add('hidden'));
+      document.getElementById('btn-cancel-epin').addEventListener('click', () => modalEPIN.classList.add('hidden'));
+
+      // Load packages from API and render
+      async function loadPackages() {
+        const container = document.getElementById('package-list');
+        container.innerHTML = '<div class="text-xs text-slate-400">loading packages…</div>';
+        try {
+          const res = await VerifyFrontend.fetchJson('/api/packages/public-summary', { method: 'GET' });
+          if (res && res.packages) {
+            container.innerHTML = '';
+            res.packages.forEach(p => {
+              const el = document.createElement('div');
+              el.className = 'flex items-center justify-between';
+              el.innerHTML = `
+                <div>
+                  <div class="text-sm font-medium">${escapeHtml(p.name)}</div>
+                  <div class="text-xs text-slate-400">PV ${p.pv} • Pair ₹${p.pairIncome}</div>
+                </div>
+                <div>
+                  <button class="text-xs px-2 py-1 rounded border activate-epin" data-pkg="${escapeHtml(p.name)}">Activate</button>
+                </div>
+              `;
+              container.appendChild(el);
+            });
+
+            // add handlers to activate-epin buttons
+            container.querySelectorAll('.activate-epin').forEach(btn => {
+              btn.addEventListener('click', () => {
+                modalEPIN.classList.remove('hidden');
+                const selected = btn.dataset.pkg;
+                // put package into EPIN form meta or show toast
+                VerifyFrontend.showToast(`Activate EPIN for ${selected}`, 'info');
+              });
+            });
+          } else {
+            container.innerHTML = '<div class="text-xs text-slate-400">No packages</div>';
+          }
+        } catch (err) {
+          container.innerHTML = '<div class="text-xs text-red-500">Failed to load packages</div>';
+          console.error(err);
+        }
+      }
+
+      loadPackages();
+
+      // server time update
+      function updateServerTime() {
+        const el = document.getElementById('server-time');
+        const now = new Date();
+        el.textContent = now.toLocaleString();
+      }
+      updateServerTime();
+      setInterval(updateServerTime, 1000);
+
+      // small helper to escape HTML
+      function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, function (c) { return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]; }); }
+
+      // mock: load user dashboard if logged in (token)
+      async function loadUser() {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          document.getElementById('user-greeting').textContent = 'Welcome, Guest';
+          document.getElementById('user-pv').textContent = '0 PV';
+          document.getElementById('user-rank').textContent = '-';
+          return;
+        }
+        try {
+          const resp = await VerifyFrontend.fetchJson('/api/me', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (resp && resp.ok && resp.user) {
+            const u = resp.user;
+            document.getElementById('user-greeting').textContent = `Welcome, ${u.name || u.userId}`;
+            document.getElementById('user-sub').textContent = `ID: ${u.userId} • Sponsor: ${u.sponsorId || '-'}`;
+            document.getElementById('wallet-balance').textContent = `₹${(u.walletBalance||0).toFixed(2)}`;
+            document.getElementById('user-pv').textContent = `${u.pv || 0} PV`;
+            document.getElementById('user-rank').textContent = u.rank || '-';
+            // load user's recent activities if provided
+            if (u.recent && u.recent.length) {
+              const act = document.getElementById('activity-list');
+              act.innerHTML = '';
+              u.recent.slice(0,6).forEach(it => {
+                const row = document.createElement('div');
+                row.className = 'text-sm';
+                row.innerHTML = `<div class="text-slate-700">${escapeHtml(it.message)}</div><div class="text-xs text-slate-400">${new Date(it.at).toLocaleString()}</div>`;
+                act.appendChild(row);
+              });
+            }
+          } else {
+            // token invalid? remove
+            localStorage.removeItem('authToken');
+          }
+        } catch (e) {
+          console.error('loadUser error', e);
+        }
+      }
+      loadUser();
+
+      // wallet actions
+      document.getElementById('withdraw-btn').addEventListener('click', () => {
+        VerifyFrontend.showToast('Withdraw request sent (demo)', 'info');
+      });
+      document.getElementById('wallet-history-btn').addEventListener('click', () => {
+        VerifyFrontend.showToast('Open wallet history (not implemented)', 'info');
+      });
+
+      // EPIN form handled by VerifyFrontend (data-vf="epin")
+    });
+  </script>
+</body>
 </html>
