@@ -1,56 +1,151 @@
 // src/utils/sessionTimer.js
-// Helpers for 8 sessions per day, 2h15m each
-// Returns sessionIndex (1..8) and remaining ms for current session
+// ------------------------------------------------------
+// HYBRID MLM: 8-Session Engine Timer Utility
+// ------------------------------------------------------
+// This file provides:
+// 1) getCurrentSession()        → returns active session index & label
+// 2) getNextSessionStart()      → timestamp of next session start
+// 3) getRemainingSessionTime()  → remaining time of current session
+// 4) getDailySessions()         → full session timetable
+// ------------------------------------------------------
 
-export const SESSION_SCHEDULE = [
-  ["06:00", "08:15"],
-  ["08:15", "10:30"],
-  ["10:30", "12:45"],
-  ["12:45", "15:00"],
-  ["15:00", "17:15"],
-  ["17:15", "19:30"],
-  ["19:30", "21:45"],
-  ["21:45", "00:00"]
+// ------------------------------------------------------
+// DAILY 8 SESSIONS (FINAL PLAN)
+// Each session = 2 hours 15 minutes
+// ------------------------------------------------------
+export const SESSIONS = [
+  { index: 1, start: "06:00", end: "08:15" },
+  { index: 2, start: "08:15", end: "10:30" },
+  { index: 3, start: "10:30", end: "12:45" },
+  { index: 4, start: "12:45", end: "15:00" },
+  { index: 5, start: "15:00", end: "17:15" },
+  { index: 6, start: "17:15", end: "19:30" },
+  { index: 7, start: "19:30", end: "21:45" },
+  { index: 8, start: "21:45", end: "24:00" },
 ];
 
-function parseTime(base, hhmm) {
-  const [hh, mm] = hhmm.split(":").map(Number);
-  const d = new Date(base);
-  d.setHours(hh, mm, 0, 0);
-  return d;
-}
+// Convert HH:MM → today timestamp
+const toTodayTime = (timeStr) => {
+  const [h, m] = timeStr.split(":").map(Number);
+  const now = new Date();
+  now.setHours(h === 24 ? 23 : h, h === 24 ? 59 : m, 59, 999);
+  return now.getTime();
+};
 
-export function getSessionInfo(now = new Date()) {
-  // returns { sessionIndex: 1..8 or null, start: Date, end: Date, timeLeftMs }
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  for (let i = 0; i < SESSION_SCHEDULE.length; i++) {
-    let [s, e] = SESSION_SCHEDULE[i];
-    let start = parseTime(today, s);
-    let end = parseTime(today, e);
-    // handle midnight end (end <= start)
-    if (end <= start) end.setDate(end.getDate() + 1);
+// ------------------------------------------------------
+// 1) Get Current Active Session
+// ------------------------------------------------------
+export function getCurrentSession() {
+  const now = Date.now();
 
-    if (now >= start && now < end) {
-      return { sessionIndex: i + 1, start, end, timeLeftMs: end - now };
+  for (let s of SESSIONS) {
+    const start = toTodayTime(s.start);
+    const end = toTodayTime(s.end);
+
+    if (now >= start && now <= end) {
+      return {
+        sessionNo: s.index,
+        label: `Session-${s.index}`,
+        start,
+        end,
+      };
     }
   }
-  // If none matched, return next upcoming session (useful for UI)
-  for (let i = 0; i < SESSION_SCHEDULE.length; i++) {
-    let [s] = SESSION_SCHEDULE[i];
-    let start = parseTime(today, s);
-    if (start > now) return { sessionIndex: null, nextSession: i + 1, start, timeLeftMs: start - now };
-  }
-  // next is tomorrow session 1
-  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
-  const start = parseTime(tomorrow, SESSION_SCHEDULE[0][0]);
-  return { sessionIndex: null, nextSession: 1, start, timeLeftMs: start - now };
+
+  // If time is past midnight (00:00–06:00)
+  return {
+    sessionNo: 0,
+    label: "No Active Session",
+    start: null,
+    end: null,
+  };
 }
 
-export function formatMs(ms) {
-  if (ms <= 0) return "00:00:00";
-  const s = Math.floor(ms / 1000);
-  const hh = String(Math.floor(s / 3600)).padStart(2, "0");
-  const mm = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
-  const ss = String(s % 60).padStart(2, "0");
-  return `${hh}:${mm}:${ss}`;
+// ------------------------------------------------------
+// 2) Get Next Session Start Time
+// ------------------------------------------------------
+export function getNextSessionStart() {
+  const now = Date.now();
+
+  for (let s of SESSIONS) {
+    const start = toTodayTime(s.start);
+    if (now < start) {
+      return {
+        nextSession: s.index,
+        startTimestamp: start,
+      };
+    }
+  }
+
+  // If day ended → next day session-1 automatically next
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(6, 0, 0, 0);
+
+  return {
+    nextSession: 1,
+    startTimestamp: tomorrow.getTime(),
+  };
 }
+
+// ------------------------------------------------------
+// 3) Remaining Time for Current Session
+// ------------------------------------------------------
+export function getRemainingSessionTime() {
+  const session = getCurrentSession();
+
+  if (!session || !session.end) {
+    return {
+      remainingMs: 0,
+      formatted: "00:00:00",
+    };
+  }
+
+  const now = Date.now();
+  const diff = session.end - now;
+
+  if (diff <= 0) {
+    return {
+      remainingMs: 0,
+      formatted: "00:00:00",
+    };
+  }
+
+  const hrs = Math.floor(diff / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+
+  return {
+    remainingMs: diff,
+    formatted: `${hrs.toString().padStart(2, "0")}:${mins
+      .toString()
+      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`,
+  };
+}
+
+// ------------------------------------------------------
+// 4) Get All Daily Sessions
+// ------------------------------------------------------
+export function getDailySessions() {
+  return SESSIONS;
+}
+
+// ------------------------------------------------------
+// 5) Utility: Check if session ended (used by session engine)
+// ------------------------------------------------------
+export function isSessionEnded() {
+  const session = getCurrentSession();
+  if (session.sessionNo === 0) return true;
+  return Date.now() > session.end;
+}
+
+// ------------------------------------------------------
+// 6) Export default
+// ------------------------------------------------------
+export default {
+  getCurrentSession,
+  getNextSessionStart,
+  getRemainingSessionTime,
+  getDailySessions,
+  isSessionEnded,
+};
