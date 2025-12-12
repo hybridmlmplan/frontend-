@@ -1,5 +1,404 @@
+/* src/styles/global.css */
+
+/* ====== Tailwind base (required for Tailwind projects) ====== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html,body,#root { height: 100%; }
+/* ===================================================================
+   Custom CSS Variables (Theme tokens) - adjust as per branding
+   =================================================================== */
+:root{
+  /* Primary palette */
+  --bg: #0f172a;         /* dark bg */
+  --card-bg: #0b1220;
+  --muted: #94a3b8;
+  --accent: #06b6d4;     /* teal-ish accent */
+
+  /* Package colors */
+  --silver: #9ea7b3;
+  --gold: #f6b91c;
+  --ruby: #c72c48;
+
+  /* Binary red/green visual */
+  --binary-red: #ef4444;
+  --binary-green: #10b981;
+
+  /* Success / warning / info */
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --info: #3b82f6;
+
+  /* UI */
+  --glass: rgba(255,255,255,0.04);
+  --glass-2: rgba(255,255,255,0.02);
+  --radius: 12px;
+  --soft-shadow: 0 6px 18px rgba(2,6,23,0.6);
+  --glass-border: rgba(255,255,255,0.03);
+}
+
+/* ===================================================================
+   Base resets / global helpers
+   =================================================================== */
+html,body,#root{
+  height:100%;
+  background: linear-gradient(180deg,var(--bg), #071025 60%);
+  color: #e6eef8;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+               Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ===================================================================
+   Layout helpers
+   =================================================================== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 1rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .grid-3 { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 640px) {
+  .grid-3, .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ===================================================================
+   Card component
+   =================================================================== */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), var(--card-bg));
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: var(--soft-shadow);
+  border: 1px solid var(--glass-border);
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(2,6,23,0.75);
+}
+
+/* Card header / title */
+.card .title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #eef6ff;
+}
+.card .subtitle {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ===================================================================
+   Buttons & inputs
+   =================================================================== */
+.btn {
+  display: inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: transform .12s ease, box-shadow .12s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn:active { transform: translateY(1px); }
+
+/* primary */
+.btn-primary {
+  background: linear-gradient(90deg,var(--accent), #06b6b4 60%);
+  color: #012026;
+  box-shadow: 0 6px 18px rgba(6,182,212,0.14);
+}
+
+/* outline / ghost */
+.btn-ghost {
+  background: transparent;
+  color: #dbeafe;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+/* success/danger small */
+.btn-success { background: var(--success); color: white; }
+.btn-danger { background: var(--danger); color: white; }
+
+/* Inputs */
+.input {
+  display:block;
+  width:100%;
+  padding:.6rem .75rem;
+  border-radius:8px;
+  background: rgba(255,255,255,0.02);
+  color: #e6eef8;
+  border: 1px solid rgba(255,255,255,0.03);
+  outline: none;
+  transition: box-shadow .12s ease, border-color .12s ease;
+}
+.input:focus {
+  border-color: rgba(6,182,212,0.9);
+  box-shadow: 0 6px 20px rgba(6,182,212,0.06);
+}
+
+/* Form label */
+.form-label { font-size:0.85rem; color: var(--muted); margin-bottom:0.35rem; }
+
+/* ===================================================================
+   Badges (package & binary state)
+   =================================================================== */
+.badge {
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  padding:.25rem .6rem;
+  border-radius:999px;
+  font-weight:700;
+  font-size:0.82rem;
+  color:#021021;
+}
+
+/* package badges */
+.badge-silver { background: linear-gradient(180deg,var(--silver), #bcc7cf); color:#071722; }
+.badge-gold   { background: linear-gradient(180deg,var(--gold), #f3c66a); color:#221200; }
+.badge-ruby   { background: linear-gradient(180deg,var(--ruby), #d0455b); color:#fff; }
+
+/* binary indicator */
+.badge-red   { background: var(--binary-red); color: white; padding:.35rem .5rem; border-radius:8px; font-weight:700; }
+.badge-green { background: var(--binary-green); color: white; padding:.35rem .5rem; border-radius:8px; font-weight:700; }
+
+/* royalty badge */
+.badge-royalty {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.03);
+  padding: .35rem .55rem;
+  border-radius: 8px;
+  color: var(--gold);
+  font-weight:700;
+}
+
+/* ===================================================================
+   Session clock / timer component
+   =================================================================== */
+.session-clock {
+  display:flex;
+  width:100%;
+  align-items:center;
+  justify-content:space-between;
+  gap:.5rem;
+  padding:.6rem;
+  border-radius:10px;
+  background: linear-gradient(90deg,var(--glass), transparent);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+.session-clock .left {
+  display:flex;
+  flex-direction:column;
+}
+.session-clock .session-label {
+  font-weight:800;
+  font-size:1rem;
+}
+.session-clock .session-time {
+  font-size:0.92rem;
+  color:var(--muted);
+}
+
+/* countdown digits */
+.countdown {
+  display:flex;
+  gap:.45rem;
+  align-items:center;
+}
+.digit {
+  min-width:60px;
+  padding:.5rem .6rem;
+  border-radius:8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.03);
+  text-align:center;
+  font-weight:800;
+  font-size:1.05rem;
+}
+
+/* small label under countdown */
+.countdown .label { font-size:0.75rem; color:var(--muted); margin-top:.35rem; text-align:center; }
+
+/* ===================================================================
+   Table styles
+   =================================================================== */
+.table {
+  width:100%;
+  border-collapse: collapse;
+  font-size:0.95rem;
+  color:#dbeafe;
+}
+
+.table thead th {
+  text-align:left;
+  padding:.75rem;
+  font-weight:700;
+  font-size:0.85rem;
+  color: #cfe8ff;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.table tbody tr {
+  border-bottom: 1px dashed rgba(255,255,255,0.03);
+}
+
+.table tbody td {
+  padding:.8rem;
+  color:#dbeafe;
+}
+
+/* row highlight */
+.table tbody tr:hover {
+  background: linear-gradient(90deg, rgba(255,255,255,0.015), transparent);
+}
+
+/* small helper cells */
+.cell-muted { color: var(--muted); font-size:0.9rem; }
+.cell-strong { font-weight:800; color:#e6f4ff; }
+
+/* ===================================================================
+   Loader & spinner
+   =================================================================== */
+.loader {
+  display:inline-block;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  border:4px solid rgba(255,255,255,0.06);
+  border-top-color: var(--accent);
+  animation: spin 900ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* small inline loader (text) */
+.inline-loader {
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+}
+
+/* ===================================================================
+   Alerts & messages
+   =================================================================== */
+.alert {
+  padding:.6rem .75rem;
+  border-radius:10px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.03);
+  color: #eaf6ff;
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+}
+
+/* success / warning / danger */
+.alert-success { border-left:4px solid var(--success); }
+.alert-warning { border-left:4px solid var(--warning); }
+.alert-danger  { border-left:4px solid var(--danger); }
+
+/* ===================================================================
+   Small components: Package card details, pair badge, rank row
+   =================================================================== */
+.package-card {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding:.75rem;
+  border-radius:10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.02);
+}
+.package-left {
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+}
+
+/* pv/bv pill */
+.pill {
+  padding:.25rem .5rem;
+  border-radius:999px;
+  background: rgba(255,255,255,0.02);
+  color: var(--muted);
+  font-weight:700;
+}
+
+/* rank row */
+.rank-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding:.55rem;
+  border-radius:8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+  border: 1px solid rgba(255,255,255,0.02);
+}
+
+/* ===================================================================
+   Utility small helpers
+   =================================================================== */
+.text-muted { color: var(--muted); }
+.small { font-size:0.85rem; }
+.kicker { color: #9dbfd6; font-size:0.82rem; font-weight:700; }
+
+/* spacing */
+.mt-1 { margin-top:.25rem; }  .mt-2 { margin-top:.5rem; } .mt-3 { margin-top:1rem; }
+.mb-1 { margin-bottom:.25rem; } .mb-2 { margin-bottom:.5rem; } .mb-3 { margin-bottom:1rem; }
+
+/* ===================================================================
+   Accessibility & reduced motion
+   =================================================================== */
+@media (prefers-reduced-motion: reduce){
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition: none !important; }
+}
+
+/* ===================================================================
+   Example quick utility for pair indicator (red/green with value)
+   =================================================================== */
+.pair-indicator {
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  padding:.45rem .6rem;
+  border-radius:8px;
+  font-weight:800;
+}
+.pair-indicator .value { font-size:1rem; }
+.pair-indicator.red { background: rgba(255,68,68,0.08); color: var(--binary-red); border:1px solid rgba(255,68,68,0.06); }
+.pair-indicator.green { background: rgba(16,185,129,0.08); color: var(--binary-green); border:1px solid rgba(16,185,129,0.06); }
+
+/* ===================================================================
+   Final note: keep this file as the global theme. For specific components,
+   prefer scoped component CSS or Tailwind utility classes in JSX.
+   =================================================================== */
