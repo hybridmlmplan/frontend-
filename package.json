@@ -1,4 +1,4 @@
- {
+{
   "name": "hybrid-mlm-frontend",
   "version": "1.0.0",
   "private": true,
@@ -52,5 +52,4 @@
     "genealogy",
     "epin"
   ]
-} 
 }
