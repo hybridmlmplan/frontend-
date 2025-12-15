@@ -1,13 +1,16 @@
 // src/api.js
 // Centralized API client for Hybrid MLM frontend
 // Vite + Railway compatible
-// Replace entire file – no edits needed
+// FINAL – /api prefix FIXED
 
 // ================= API BASE =================
-const API_BASE =
-  (typeof __API_BASE__ !== 'undefined' && __API_BASE__) ||
-  (import.meta?.env?.VITE_API_BASE_URL) ||
-  "https://backend-production-9337.up.railway.app"; // Railway backend
+const RAW_BASE =
+  (typeof __API_BASE__ !== "undefined" && __API_BASE__) ||
+  import.meta?.env?.VITE_API_BASE_URL ||
+  "http://backend-production-9337.up.railway.app";
+
+// ✅ FINAL BASE WITH /api
+const API_BASE = RAW_BASE.replace(/\/$/, "") + "/api";
 
 const DEFAULT_TIMEOUT = 15000;
 const DEFAULT_RETRIES = 2;
@@ -34,7 +37,7 @@ function _getCache(key) {
 async function _fetch(path, opts = {}) {
   const url = path.startsWith("http")
     ? path
-    : `${API_BASE.replace(/\/$/, "")}${path.startsWith("/") ? path : "/" + path}`;
+    : `${API_BASE}${path.startsWith("/") ? path : "/" + path}`;
 
   const timeout = opts.timeout ?? DEFAULT_TIMEOUT;
   const retries = typeof opts.retries === "number" ? opts.retries : DEFAULT_RETRIES;
@@ -104,31 +107,14 @@ function _authHeaders(extra = {}) {
 // ================= API OBJECT =================
 const Api = {
   // ---------- AUTH ----------
-  async signup(payload) {
-    try {
-      const res = await _fetch("/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      return { ok: true, data: res };
-    } catch (err) {
-      return { ok: false, error: err.message, status: err.status || 0 };
-    }
+  signup(payload) {
+    return Api.post("/auth/signup", payload);
   },
 
   async login(payload) {
-    try {
-      const res = await _fetch("/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (res?.token) setToken(res.token);
-      return { ok: true, data: res };
-    } catch (err) {
-      return { ok: false, error: err.message, status: err.status || 0 };
-    }
+    const res = await Api.post("/auth/login", payload);
+    if (res.ok && res.data?.token) setToken(res.data.token);
+    return res;
   },
 
   logout() {
@@ -173,16 +159,15 @@ const Api = {
     }
   },
 
-  // ---------- BASIC TEST ----------
-  async health() {
-    return Api.get("/");
+  // ---------- BASIC ----------
+  health() {
+    return Api.get("/test");
   },
 
-  // ---------- TOKEN HELPERS ----------
+  // ---------- TOKEN ----------
   setToken,
   getToken,
   clearToken,
 };
 
-// ================= EXPORT =================
 export default Api;
