@@ -1,13 +1,13 @@
 // src/api.js
 // Centralized API client for Hybrid MLM frontend
 // Vite + Railway compatible
-// FINAL – /api prefix FIXED
+// FINAL – HTTPS + /api FIXED
 
 // ================= API BASE =================
 const RAW_BASE =
   (typeof __API_BASE__ !== "undefined" && __API_BASE__) ||
   import.meta?.env?.VITE_API_BASE_URL ||
-  "http://backend-production-9337.up.railway.app";
+  "https://backend-production-9337.up.railway.app"; // ✅ HTTPS
 
 // ✅ FINAL BASE WITH /api
 const API_BASE = RAW_BASE.replace(/\/$/, "") + "/api";
