@@ -1,31 +1,51 @@
+// src/main.jsx
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
+import "./index.css";
 
-// pages (import paths apne project ke hisab se sahi hi rahenge)
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import Package from "./pages/package/BuyPackage";
+// Error Boundary (simple & safe)
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-const App = () => {
-  return (
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    console.error("App crashed:", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded"
+          >
+            Reload App
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const container = document.getElementById("root");
+const root = createRoot(container);
+
+root.render(
+  <React.StrictMode>
     <BrowserRouter>
-      {/* Navbar always on top */}
-      <Navbar />
-
-      {/* IMPORTANT: margin-top for fixed navbar */}
-      <div className="pt-16 min-h-screen pointer-events-auto">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/package" element={<Package />} />
-        </Routes>
-      </div>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </BrowserRouter>
-  );
-};
-
-export default App;
+  </React.StrictMode>
+);
